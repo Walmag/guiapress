@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
 const connection = require("./database/database");
+const session = require("express-session");
 
 const categoriesController = require("./categories/CategoriesController");
 const articlesController = require("./articles/ArticlesController");
@@ -15,6 +16,11 @@ const { findAll } = require("./categories/Category");
 
 // View Engine
 app.set('view engine', 'ejs');
+
+// Sessions
+app.use(session({
+    secret: "jdsfjlsfjalfjwierjnrbvbvcxmcxocrocjorqlrnqpopermmvc", cookie: { maxAge: 30000000000000000 } 
+}))
 
 // Static
 app.use(express.static('public'));
@@ -36,6 +42,25 @@ connection
 app.use("/", categoriesController);
 app.use("/", articlesController);
 app.use("/", usersController);
+
+app.get("/session", (req, res) => {
+    req.session.treinamento = "Formação Node.js"
+    req.session.ano = 2020
+    req.session.user = {
+        username: "walmag",
+        email: "@walmag.com"
+    }
+    res.send("Sessão gerada!");
+});
+
+
+app.get("/leitura", (req, res) => {
+    res.json({
+        treinamento: req.session.treinamento,
+        ano: req.session.ano, 
+        user: req.session.user
+    })
+});
 
 app.get("/", (req, res) => {
     Article.findAll({
